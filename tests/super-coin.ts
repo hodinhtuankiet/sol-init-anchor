@@ -2,15 +2,28 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SuperCoin } from "../target/types/super_coin";
 
-describe("super-coin", () => {
-  // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env());
+describe("todo-program", () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+  const program = anchor.workspace.TodoProgram as Program<TodoProgram>;
+  const name = "Khac Vy";
 
-  const program = anchor.workspace.superCoin as Program<SuperCoin>;
+  it("Create profile", async () => {
+    const [profile, _bump] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("profile"), provider.publicKey.toBuffer()],
+      program.programId
+    );
 
-  it("Is initialized!", async () => {
-    // Add your test here.
-    const tx = await program.methods.initialize().rpc();
+    const tx = await program.methods
+      .createProfile(name)
+      .accounts({
+        creator: provider.publicKey,
+        profile: profile,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
     console.log("Your transaction signature", tx);
   });
 });
+
